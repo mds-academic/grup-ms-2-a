@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIT App Inventor SMP - Data & Privacy (Part 1)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --yellow: #FFE500;
+            --blue: #00C6FF;
+            --black: #1A1A1A;
+            --white: #FFFFFF;
+            --bg-light: #E8E8E8;
+            --green: #00E676;
+            --pink: #FF9DE2;
+            --red: #FF0055;
+            --orange: #FF9800;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            background-image: radial-gradient(#bcbcbc 2px, transparent 2px);
+            background-size: 30px 30px;
+            font-family: 'Fredoka', sans-serif;
+            color: var(--black);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* App Container (Landscape 16:9 Simulator) */
+        .app-container {
+            position: relative; z-index: 10;
+            width: 98vw; max-width: 1400px;
+            height: 98vh; max-height: 900px;
+            display: flex; flex-direction: column;
+        }
+
+        /* Header Layout */
+        .header {
+            display: flex; justify-content: flex-start; align-items: flex-start;
+            padding: 30px 50px 10px;
+            position: relative;
+            width: 100%;
+        }
+        
+        /* Banner Centered at Top */
+        .banner-container { 
+            position: absolute; top: 25px; left: 0; width: 100%;
+            text-align: center; display: flex; flex-direction: column; align-items: center; 
+            z-index: 10; pointer-events: none;
+        }
+        
+        .banner-shape {
+            background-color: var(--blue);
+            padding: 12px 60px;
+            border: 4px solid var(--black);
+            border-radius: 12px;
+            box-shadow: 6px 6px 0px var(--black);
+            display: inline-block;
+        }
+        
+        .banner-text { 
+            font-size: 28px; font-weight: 700; letter-spacing: 2px; color: var(--white); 
+            text-shadow: 2px 2px 0px var(--black), -1px -1px 0px var(--black), 1px -1px 0px var(--black), -1px 1px 0px var(--black), 1px 1px 0px var(--black);
+        }
+        
+        .banner-subtitle {
+            background-color: var(--yellow); 
+            color: var(--black); 
+            padding: 8px 40px; 
+            font-size: 16px; font-weight: 700;
+            border: 3px solid var(--black);
+            border-radius: 20px; 
+            margin-top: -15px; 
+            text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 4px 4px 0px var(--black);
+            display: inline-block;
+        }
+
+        /* Slides Area */
+        .slides-area {
+            flex: 1; position: relative; margin: 30px 50px 0; perspective: 1200px;
+            min-height: 0; 
+        }
+
+        .slide {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: none;
+        }
+        
+        .slide.active { 
+            display: block; 
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .content-card {
+            background-color: var(--white);
+            border: 4px solid var(--black); 
+            border-radius: 24px;
+            padding: 40px 60px; 
+            box-shadow: 12px 12px 0px var(--black);
+            width: 100%; height: 100%; 
+            overflow-y: auto;
+            display: flex;
+            position: relative;
+        }
+
+        .content-card::-webkit-scrollbar { width: 14px; }
+        .content-card::-webkit-scrollbar-track { background: var(--bg-light); border-left: 3px solid var(--black); border-radius: 0 20px 20px 0; }
+        .content-card::-webkit-scrollbar-thumb { background: var(--blue); border: 3px solid var(--black); border-radius: 10px; }
+
+        /* Decorative corner element */
+        .content-card::after {
+            content: '';
+            position: absolute;
+            top: -15px; right: 30px;
+            width: 40px; height: 40px;
+            background-color: var(--yellow);
+            border: 3px solid var(--black);
+            border-radius: 50%;
+            box-shadow: 4px 4px 0px var(--black);
+            z-index: 5;
+        }
+
+        /* Inner container to restrict line width and center it */
+        .inner-content {
+            max-width: 900px;
+            margin: auto;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .slide-title {
+            font-size: 32px; font-weight: 700; color: var(--black); 
+            margin-bottom: 25px; line-height: 1.3;
+            background-color: var(--yellow);
+            display: inline-block;
+            padding: 10px 25px;
+            border: 3px solid var(--black);
+            border-radius: 12px;
+            box-shadow: 5px 5px 0px var(--black);
+        }
+
+        .slide-text { font-size: 22px; line-height: 1.6; color: var(--black); font-weight: 600; }
+        .slide-text p { margin-bottom: 20px; }
+        .slide-text ul { padding-left: 40px; margin-bottom: 20px; }
+        .slide-text li { margin-bottom: 15px; position: relative; list-style-type: none; }
+        .slide-text li::before {
+            content: '▶';
+            color: var(--blue);
+            position: absolute;
+            left: -35px;
+            font-size: 20px;
+            -webkit-text-stroke: 1px var(--black);
+        }
+        
+        .slide-text strong { 
+            color: var(--black); 
+            background-color: var(--blue); 
+            padding: 2px 12px; 
+            border: 3px solid var(--black);
+            border-radius: 8px; 
+            font-weight: 700; 
+            box-shadow: 3px 3px 0px var(--black);
+            display: inline-block;
+            transform: rotate(-1deg);
+        }
+
+        .quote-box {
+            background-color: var(--yellow); 
+            border: 4px solid var(--black);
+            padding: 20px 30px; 
+            border-radius: 16px; 
+            margin: 30px 0; 
+            font-weight: 700; color: var(--black); font-size: 24px;
+            box-shadow: 8px 8px 0px var(--blue);
+            position: relative;
+        }
+
+        /* Navigation Controls */
+        .nav-container {
+            padding: 25px 50px 35px; display: flex; justify-content: space-between; align-items: center;
+            min-height: 100px;
+        }
+
+        .nav-btn {
+            background-color: var(--yellow); 
+            border: 4px solid var(--black);
+            color: var(--black); padding: 12px 35px; border-radius: 30px; cursor: pointer;
+            font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 18px;
+            transition: all 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 6px 6px 0px var(--black);
+        }
+
+        .nav-btn:hover:not(:disabled) { 
+            transform: translate(-2px, -2px); box-shadow: 8px 8px 0px var(--black); 
+            background-color: #FFF033;
+        }
+        
+        .nav-btn:active:not(:disabled) {
+            transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--black);
+        }
+        
+        .nav-btn:disabled { 
+            background-color: #e0e0e0;
+            color: #888;
+            border-color: #888;
+            box-shadow: 2px 2px 0px #888; 
+            transform: translate(4px, 4px); 
+            cursor: not-allowed; 
+        }
+        
+        .counter-group {
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            background: var(--white);
+            padding: 12px 30px;
+            border: 4px solid var(--black);
+            border-radius: 24px;
+            box-shadow: 6px 6px 0px var(--black);
+            transform: rotate(1deg);
+        }
+
+        .slide-counter { font-size: 18px; font-weight: 700; color: var(--black); }
+
+        .progress-bar-bg {
+            width: 200px; height: 18px; background-color: var(--bg-light); 
+            border: 3px solid var(--black); border-radius: 10px; overflow: hidden;
+            box-shadow: inset 2px 2px 0px rgba(0,0,0,0.1);
+        }
+        
+        .progress-bar {
+            height: 100%; background-color: var(--blue); 
+            border-right: 3px solid var(--black);
+            transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Playground / Mini-App Interactive Style */
+        .playground-card {
+            background: #fdfdfd;
+            border: 3px solid var(--black);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 6px 6px 0px var(--black);
+            text-align: left;
+        }
+
+        .input-text-custom {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 18px;
+            font-family: inherit;
+            border: 3px solid var(--black);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .btn-action-custom {
+            background-color: var(--blue);
+            color: var(--white);
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 18px;
+            padding: 10px 25px;
+            border: 3px solid var(--black);
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px var(--black);
+            transition: all 0.1s;
+        }
+
+        .btn-action-custom:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 5px 5px 0px var(--black);
+        }
+
+        .btn-action-custom:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--black);
+        }
+
+        .result-box {
+            margin-top: 15px;
+            background-color: var(--black);
+            color: var(--green);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            font-size: 20px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Quiz Layout */
+        .quiz-option {
+            background-color: var(--white);
+            border: 3px solid var(--black);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px var(--black);
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .quiz-option:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--black);
+            background-color: #f7f7f7;
+        }
+
+        .quiz-option.correct {
+            background-color: var(--green);
+            color: var(--black);
+        }
+
+        .quiz-option.wrong {
+            background-color: var(--red);
+            color: var(--white);
+        }
+
+        .session-tag {
+            display: inline-block;
+            background-color: var(--black);
+            color: var(--white);
+            border: 3px solid var(--black);
+            border-radius: 999px;
+            padding: 8px 18px;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            box-shadow: 4px 4px 0px var(--blue);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin: 22px 0;
+        }
+
+        .mini-card {
+            background-color: var(--white);
+            border: 3px solid var(--black);
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 5px 5px 0px var(--black);
+        }
+
+        .mini-card h3 {
+            font-size: 21px;
+            margin-bottom: 10px;
+        }
+
+        .mini-card p,
+        .mini-card li {
+            font-size: 19px;
+            line-height: 1.45;
+        }
+
+        .flow-steps {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin: 22px 0;
+        }
+
+        .flow-step {
+            background-color: #FFF9C4;
+            border: 3px solid var(--black);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            box-shadow: 4px 4px 0px var(--black);
+        }
+
+        .app-screen {
+            background-color: #F3F8FF;
+            border: 4px solid var(--black);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 7px 7px 0px var(--black);
+            margin: 24px 0;
+        }
+
+        .tiny-note {
+            font-size: 17px;
+            line-height: 1.45;
+            background-color: rgba(255, 229, 0, 0.45);
+            border: 3px dashed var(--black);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-top: 16px;
+        }
+
+        .practice-layout {
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: 22px;
+            margin: 20px 0;
+            align-items: stretch;
+        }
+
+        .component-list {
+            background: #FFFDE7;
+            border: 3px solid var(--black);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 5px 5px 0px var(--black);
+        }
+
+        .component-list h3,
+        .block-stack h3 {
+            font-size: 21px;
+            margin-bottom: 12px;
+        }
+
+        .component-pill {
+            display: inline-block;
+            background: var(--white);
+            border: 3px solid var(--black);
+            border-radius: 10px;
+            padding: 7px 10px;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 5px 4px;
+            box-shadow: 3px 3px 0px var(--black);
+        }
+
+        .indent-1 { margin-left: 28px; }
+        .indent-2 { margin-left: 56px; }
+
+        .rubric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 900px) {
+            .info-grid,
+            .flow-steps,
+            .practice-layout,
+            .rubric-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-card {
+                padding: 30px;
+            }
+
+            .slide-title {
+                font-size: 26px;
+            }
+
+            .slide-text {
+                font-size: 19px;
+            }
+        }
+
+        /* Real Flowchart Shapes */
+        .fc-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .fc-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fc-node {
+            background-color: var(--white);
+            border: 3px solid var(--black);
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+            box-shadow: 4px 4px 0px var(--black);
+            position: relative;
+            z-index: 2;
+            min-width: 140px;
+        }
+        .fc-oval {
+            border-radius: 50px;
+            background-color: #E3F2FD;
+        }
+        .fc-rect {
+            border-radius: 8px;
+            background-color: #FFF8E1;
+        }
+        .fc-para {
+            transform: skew(-15deg);
+            background-color: #E8F5E9;
+            border-radius: 8px;
+            padding: 10px 30px;
+        }
+        .fc-para > span {
+            display: block;
+            transform: skew(15deg);
+        }
+        .fc-diamond-wrapper {
+            position: relative;
+            width: 140px;
+            height: 110px;
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fc-diamond {
+            position: absolute;
+            width: 80px; height: 80px;
+            background-color: #FCE4EC;
+            border: 3px solid var(--black);
+            transform: rotate(45deg);
+            box-shadow: 4px 4px 0px var(--black);
+            z-index: 1;
+        }
+        .fc-diamond-text {
+            position: relative;
+            z-index: 2;
+            font-size: 15px;
+            font-weight: 700;
+            text-align: center;
+            padding: 5px;
+            max-width: 120px;
+        }
+        .fc-arrow-down {
+            width: 4px; height: 15px;
+            background-color: var(--black);
+            position: relative;
+            margin: 2px 0;
+        }
+        .fc-arrow-down::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; left: -6px;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 10px solid var(--black);
+        }
+        .fc-arrow-right {
+            width: 25px; height: 4px;
+            background-color: var(--black);
+            position: relative;
+            margin: 0 5px;
+        }
+        .fc-arrow-right::after {
+            content: '';
+            position: absolute;
+            right: -5px; top: -6px;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 10px solid var(--black);
+        }
+        .fc-arrow-left {
+            width: 25px; height: 4px;
+            background-color: var(--black);
+            position: relative;
+            margin: 0 5px;
+        }
+        .fc-arrow-left::after {
+            content: '';
+            position: absolute;
+            left: -5px; top: -6px;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 10px solid var(--black);
+        }
+
+        /* ------------------------------------------------------------- */
+        /* UI overrides for ALL phone mockups                            */
+        /* ------------------------------------------------------------- */
+        .phone-mock, .phone-mockup, .ai-phone, .ai2-phone {
+            width: 320px; height: 520px; border: 12px solid #333; border-radius: 24px;
+            background: white; margin: 0 auto; position: relative; overflow: hidden;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.2); font-family: sans-serif;
+            min-height: auto; padding: 0; display: block;
+        }
+        
+        /* Add a universal status bar to all phones */
+        .phone-mock::before, .phone-mockup::before, .ai-phone::before, .ai2-phone::before {
+            content: "12:00  a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 100%";
+            position: absolute; top: 0; left: 0; right: 0; height: 25px;
+            background: #202124; color: white; font-size: 10px; display: flex; align-items: center; padding: 0 15px; z-index: 10; white-space: pre;
+        }
+        
+        /* Hide existing status bars */
+        .ai-phone-top, .ai2-phone-header, .phone-mockup-top { display: none !important; }
+
+        /* The screen container */
+        .phone-screen, .ai-screen, .ai2-phone-screen {
+            position: absolute; top: 25px; bottom: 0; left: 0; right: 0;
+            padding: 15px; display: flex; flex-direction: column; gap: 15px;
+            background: white; overflow-y: auto; border: none; border-radius: 0; height: auto !important; margin: 0 !important;
+        }
+
+        /* Title bar */
+        .app-title-bar, .ai-titlebar, .ai2-titlebar {
+            background: #1a73e8; color: white; display: flex; align-items: center; justify-content: flex-start; padding-left: 15px; font-weight: bold; font-size: 16px;
+            height: 40px !important; min-height: 40px; margin: 0; width: 100%; border: none; box-shadow: none; border-radius: 0;
+        }
+        
+        /* If title bar is inside screen (Group A) */
+        .phone-screen > .app-title-bar {
+            margin: -15px -15px 0 -15px !important;
+            width: auto;
+        }
+        
+        /* If title bar is sibling of screen (Group B) */
+        .phone-mock > .ai-titlebar, .ai-phone > .ai-titlebar, .phone-mockup > .ai2-titlebar {
+            position: absolute; top: 25px; left: 0; right: 0; z-index: 5;
+        }
+        
+        /* Shift screen down if sibling title bar exists */
+        .ai-phone > .ai-screen, .phone-mockup > .ai2-phone-screen {
+            top: 65px !important;
+        }
+
+        /* Inputs and labels inside phone */
+        .mock-label, .ai-comp-label { color: #000; font-size: 16px; margin: 0; font-weight: normal; }
+        .mock-input, .ai-comp-textbox { border: 1px solid #777; padding: 10px; color: #555; background: #fff; font-size: 14px; border-radius: 0; margin-bottom: 0; }
+        .mock-button, .ai-comp-button { background: #1a73e8; color: white; text-align: center; padding: 12px; border: none; font-weight: bold; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin: 0; }
+        .mock-button:hover, .ai-comp-button:hover { background: #1557b0; }
+        .mock-output { background: #f8f9fa; border: 1px dashed #ccc; border-radius: 4px; padding: 12px; min-height: 58px; font-size: 14px; font-weight: normal; color: #333; }
+        .ai-comp-list { border: 1px solid #777; height: 100px; background: white; padding: 5px; font-size: 14px; overflow-y: hidden;}
+
+        /* ------------------------------------------------------------- */
+        /* Block code overrides (App Inventor Accurate Colors & Shapes)  */
+        /* ------------------------------------------------------------- */
+        
+        /* Container Rules */
+        .block-code, .block-wrapper, .block-stack {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: normal; margin-bottom: 20px;
+            background-color: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; color: inherit !important;
+            display: block; line-height: 1.6;
+        }
+
+        .block-code br, .block-wrapper br, .block-stack br { display: block; content: ""; margin-top: 4px; }
+
+        /* Shared block styles */
+        span.block-badge, span.ai-block, span.block-row, span.block-nest, span.block-mit, .block-badge,
+        div.block-row, div.ai-block, div.block-nest, div.block-mit {
+            padding: 6px 12px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.15); 
+            color: white; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.2), 1px 1px 2px rgba(0,0,0,0.3);
+            font-size: 14px; font-weight: bold; line-height: 1.2;
+            font-family: 'Helvetica Neue', Helvetica, sans-serif;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+        }
+
+        /* Inline blocks */
+        span.block-badge, span.ai-block, span.block-row, span.block-nest, span.block-mit, .block-badge {
+            display: inline-block; vertical-align: middle; margin: 2px 4px 2px 0;
+        }
+
+        /* Block-level rows */
+        div.block-row, div.ai-block, div.block-nest, div.block-mit {
+            display: block; width: max-content; margin: 2px 0;
+        }
+        
+        div[style*="display:flex"] > div.ai-block, div[style*="display: flex"] > div.ai-block {
+            margin: 0;
+        }
+        div[style*="display:flex"], div[style*="display: flex"] {
+            gap: 4px; margin: 2px 0;
+        }
+
+        /* EXACT App Inventor Colors */
+        .block-control, .ai-control { background-color: #B38A36 !important; color: white !important; } 
+        .event, .ai-event { background-color: #C7922D !important; color: white !important; } 
+        .block-logic, .ai-logic, .check { background-color: #77C738 !important; color: white !important; } 
+        .block-math, .ai-math { background-color: #3F71B5 !important; color: white !important; } 
+        .block-text, .ai-text { background-color: #B32D5E !important; color: white !important; } 
+        .block-ui, .ai-variable, .action, .ai-component { background-color: #248641 !important; color: white !important; } 
+        .output, .warn, .ai-method { background-color: #5C2E91 !important; color: white !important; } 
+
+        /* Shapes and Nesting Spines */
+        .ai-event, .event { border-radius: 8px 8px 8px 0 !important; }
+        
+        .ai-component, .block-ui { border-radius: 16px !important; }
+        
+        .ai-nested {
+            border-left: 8px solid #B38A36; padding-left: 8px; margin-left: 4px; border-bottom-left-radius: 6px; margin-top: -2px; padding-top: 2px;
+        }
+
+        .block-row.indent-1 {
+            border-left: 8px solid #B38A36; padding-left: 8px; margin-left: 4px; border-bottom-left-radius: 6px; margin-top: -2px; padding-top: 2px;
+        }
+
+        .block-row.indent-2 {
+            border-left: 8px solid #B38A36; padding-left: 8px; margin-left: 20px; border-bottom-left-radius: 6px; margin-top: -2px; padding-top: 2px;
+        }
+        
+        .block-row.event { margin-bottom: 0; border-bottom-left-radius: 0 !important; }
+        .ai-block.ai-event { margin-bottom: 0; border-bottom-left-radius: 0 !important; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Header -->
+        <div class="header">
+            <div class="banner-container">
+                <div class="banner-shape">
+                    <div id="banner-title" class="banner-text">APP INVENTOR</div>
+                </div>
+                <div id="banner-subtitle" class="banner-subtitle">Data & Privacy</div>
+            </div>
+        </div>
+
+        <!-- Slides Wrapper -->
+        <div class="slides-area">
+            <div class="slide" data-title="PROJECT" data-subtitle="Tantangan Akhir">
+                <div class="content-card">
+                    <div class="inner-content">
+                        <h2 class="slide-title">Tantangan Akhir: Data & Privacy App</h2>
+                        <div class="slide-text">
+                            <p>Buat aplikasi MIT App Inventor bertema <strong>Smart Jajan</strong> atau <strong>Data Aman Sekolah</strong>. Aplikasi harus punya input, validasi, keputusan, dan pesan keamanan.</p>
+                            <div class="info-grid">
+                                <div class="mini-card" style="background-color:#E3F2FD;">
+                                    <h3>Wajib Ada</h3>
+                                    <ul>
+                                        <li>Minimal 2 input pengguna.</li>
+                                        <li>Validasi kosong dan angka.</li>
+                                        <li>Output berupa saran/keputusan.</li>
+                                    </ul>
+                                </div>
+                                <div class="mini-card" style="background-color:#E8F5E9;">
+                                    <h3>Nilai Plus</h3>
+                                    <ul>
+                                        <li>Menggunakan PasswordTextBox untuk data rahasia.</li>
+                                        <li>Ada Notifier untuk pesan error.</li>
+                                        <li>Flowchart sebelum membuat blok.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <p class="tiny-note">Fokus utama bukan tampilan paling ramai, tetapi alur yang jelas, data yang aman, dan keputusan yang masuk akal.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Steps -->
+            <div class="slide" data-title="PROJECT" data-subtitle="Langkah Praktik">
+                <div class="content-card">
+                    <div class="inner-content">
+                        <h2 class="slide-title">Langkah Membuat Project di App Inventor</h2>
+                        <div class="slide-text">
+                            <p>Gunakan langkah ini sebagai alur praktik di kelas. Guru bisa menghentikan presentasi di tiap langkah dan memberi waktu siswa mencoba.</p>
+                            <div class="flow-steps">
+                                <div class="flow-step">1. Pilih ide app</div>
+                                <div class="flow-step">2. Gambar flowchart</div>
+                                <div class="flow-step">3. Susun Designer</div>
+                                <div class="flow-step">4. Buat validasi Blocks</div>
+                                <div class="flow-step">5. Buat keputusan data</div>
+                                <div class="flow-step">6. Uji input salah</div>
+                            </div>
+                            <div class="rubric-grid">
+                                <div class="mini-card" style="background-color:#E3F2FD;">
+                                    <h3>Checkpoint 1</h3>
+                                    <p>Designer sudah punya input, tombol, output, dan Notifier.</p>
+                                </div>
+                                <div class="mini-card" style="background-color:#FFF8E1;">
+                                    <h3>Checkpoint 2</h3>
+                                    <p>Blocks menolak data kosong atau data yang bukan angka.</p>
+                                </div>
+                                <div class="mini-card" style="background-color:#E8F5E9;">
+                                    <h3>Checkpoint 3</h3>
+                                    <p>Aplikasi memberi saran berdasarkan kondisi data.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Rubric -->
+            <div class="slide" data-title="PROJECT" data-subtitle="Rubrik Mini">
+                <div class="content-card">
+                    <div class="inner-content">
+                        <h2 class="slide-title">Rubrik Mini Project</h2>
+                        <div class="slide-text">
+                            <p>Rubrik ini membantu siswa tahu kualitas aplikasi yang diharapkan.</p>
+                            <div class="rubric-grid">
+                                <div class="mini-card" style="background-color:#E8F5E9;">
+                                    <h3>Logika</h3>
+                                    <p>Alur if-then-else jelas, tidak menghitung sebelum validasi, dan setiap kondisi punya hasil.</p>
+                                </div>
+                                <div class="mini-card" style="background-color:#E3F2FD;">
+                                    <h3>Design</h3>
+                                    <p>Label, TextBox, tombol, dan output tertata. Pengguna tahu apa yang harus diisi.</p>
+                                </div>
+                                <div class="mini-card" style="background-color:#FFF8E1;">
+                                    <h3>Privacy</h3>
+                                    <p>Aplikasi tidak meminta data yang tidak perlu dan tidak menampilkan data rahasia.</p>
+                                </div>
+                            </div>
+                            <div class="block-stack">
+                                <h3>Uji Coba Wajib</h3>
+                                <div class="block-row check">Coba input kosong</div>
+                                <div class="block-row check">Coba input huruf di kolom angka</div>
+                                <div class="block-row check">Coba angka terlalu besar atau tidak masuk akal</div>
+                                <div class="block-row output">Cek apakah pesan aplikasi mudah dipahami</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="nav-container">
+            <button class="nav-btn" id="btn-prev" onclick="prevSlide()" disabled>◀ KEMBALI</button>
+            <div class="counter-group">
+                <span class="slide-counter"><span id="current-count">1</span> / <span id="total-count">X</span></span>
+                <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar" style="width: 1%;"></div></div>
+            </div>
+            <button class="nav-btn" id="btn-next" onclick="nextSlide()">LANJUT ▶</button>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const counter = document.getElementById('current-count');
+        const totalCounter = document.getElementById('total-count');
+        const bar = document.getElementById('progress-bar');
+        
+        let currentSlide = 0;
+        totalCounter.innerText = slides.length;
+
+        function showSlide(index) {
+            slides[currentSlide].classList.remove('active');
+            
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            
+            const contentCard = slides[currentSlide].querySelector('.content-card');
+            if(contentCard) contentCard.scrollTop = 0;
+            
+            btnPrev.disabled = currentSlide === 0;
+            btnNext.disabled = currentSlide === slides.length - 1;
+            
+            counter.innerText = currentSlide + 1;
+            bar.style.width = ((currentSlide + 1) / slides.length * 100) + '%';
+            
+            const activeSlide = slides[currentSlide];
+            const title = activeSlide.getAttribute('data-title') || 'APP INVENTOR';
+            const subtitle = activeSlide.getAttribute('data-subtitle') || 'Data & Privacy';
+            document.getElementById('banner-title').innerText = title;
+            document.getElementById('banner-subtitle').innerText = subtitle;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) showSlide(currentSlide + 1);
+        }
+        
+        function prevSlide() {
+            if (currentSlide > 0) showSlide(currentSlide - 1);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                if (currentSlide < slides.length - 1) showSlide(currentSlide + 1);
+            } else if (e.key === 'ArrowLeft') {
+                if (currentSlide > 0) showSlide(currentSlide - 1);
+            }
+        });
+
+        // Quiz Logic
+        function resetQuizOptions(element) {
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => opt.classList.remove('correct', 'wrong'));
+        }
+
+        function checkQuiz(quizId, status, element, message) {
+            resetQuizOptions(element);
+            const fb = document.getElementById(`${quizId}-feedback`);
+            fb.style.display = 'block';
+            element.classList.add(status === 'correct' ? 'correct' : 'wrong');
+            fb.textContent = message;
+            
+            if (status === 'correct') {
+                fb.style.backgroundColor = 'var(--green)';
+                fb.style.color = 'var(--black)';
+            } else {
+                fb.style.backgroundColor = 'var(--red)';
+                fb.style.color = 'var(--white)';
+            }
+        }
+
+        // Initialize first slide on load
+        showSlide(0);
+    </script>
+</body>
+</html>
