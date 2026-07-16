@@ -191,7 +191,7 @@ export const courseData = {
     bookmarks: [{"time": 1424, "label": "Pengenalan Flowchart"}, {"time": 1499, "label": "Pentingnya Flowchart"}, {"time": 1794, "label": "Komponen Flowchart"}, {"time": 2037, "label": "Menyusun Flowchart"}],
     quizzes: [
       {
-        time: 2079,
+        time: 2077,
         resume: false,
         questions: [
           {
@@ -813,7 +813,7 @@ export const courseData = {
     bookmarks: [{"time": 3228, "label": "Transaksi Digital"}, {"time": 3491, "label": "Keamanan Transaksi & OTP"}],
     quizzes: [
       {
-        time: 3683,
+        time: 3681,
         resume: false,
         questions: [
           {
