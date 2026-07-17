@@ -584,7 +584,7 @@ export const courseData = {
     `
   },
   6: {
-    thumbnail: "./thumb_6.png",
+    thumbnail: "./thumb_5.png",
     kicker: "Checkpoint 06 · Finansial",
     title: "Menganalisis Data Finansial",
     duration: "Materi 6",
@@ -779,7 +779,7 @@ export const courseData = {
     `
   },
   7: {
-    thumbnail: "./thumb_7.png",
+    thumbnail: "./thumb_5.png",
     kicker: "Checkpoint 07 · Mini Project",
     title: "Mini Project C",
     duration: "Materi 7",
@@ -803,7 +803,7 @@ export const courseData = {
     `
   },
   8: {
-    thumbnail: "./thumb_8.png",
+    thumbnail: "./thumb_5.png",
     kicker: "Checkpoint 08 · Keamanan",
     title: "Keamanan dalam Bertransaksi Digital",
     duration: "Materi 8",
@@ -844,7 +844,7 @@ export const courseData = {
     `
   },
   9: {
-    thumbnail: "./thumb_9.png",
+    thumbnail: "./thumb_5.png",
     kicker: "Checkpoint 09 · Final Project",
     title: "Final Project",
     duration: "Materi 9",

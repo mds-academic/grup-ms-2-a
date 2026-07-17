@@ -447,9 +447,10 @@ onMounted(() => {
   restoreLearningState();
 });
 
-const videoWatchedStatus = ref({
-  1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false
-});
+const createStepState = (factory) =>
+  Object.fromEntries(Object.keys(courseData).map((stepId) => [stepId, factory(stepId)]));
+
+const videoWatchedStatus = ref(createStepState(() => false));
 
 const youtubeReady = ref(false);
 const players = {};
@@ -457,18 +458,19 @@ const timeCheckers = {};
 
 
 const introRefs = ref({});
-const introPlayed = ref({ 1: true, 2: true, 3: true, 4: true, 5: true });
+const introPlayed = ref(createStepState(() => true));
 const introVideoSrc = import.meta.env.BASE_URL + 'intro.mp4';
 
-const playerStates = ref({
-  1: { isPlaying: false, currentTime: 0, duration: 0, isMuted: false, isReady: false, isError: false, hasStarted: false, isBuffering: false },
-  2: { isPlaying: false, currentTime: 0, duration: 0, isMuted: false, isReady: false, isError: false, hasStarted: false, isBuffering: false },
-  3: { isPlaying: false, currentTime: 0, duration: 0, isMuted: false, isReady: false, isError: false, hasStarted: false, isBuffering: false },
-  4: { isPlaying: false, currentTime: 0, duration: 0, isMuted: false, isReady: false, isError: false, hasStarted: false, isBuffering: false },
-  5: { isPlaying: false, currentTime: 0, duration: 0, isMuted: false, isReady: false, isError: false, hasStarted: false, isBuffering: false },
-  6: { isPlaying: false, currentTime: 0, duration: 0, isMuted: false, isReady: false, isError: false, hasStarted: false, isBuffering: false },
-  7: { isPlaying: false, currentTime: 0, duration: 0, isMuted: false, isReady: false, isError: false, hasStarted: false, isBuffering: false },
-});
+const playerStates = ref(createStepState(() => ({
+  isPlaying: false,
+  currentTime: 0,
+  duration: 0,
+  isMuted: false,
+  isReady: false,
+  isError: false,
+  hasStarted: false,
+  isBuffering: false
+})));
 
 const isFullscreen = ref(false);
 const videoContainers = ref({});
